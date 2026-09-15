@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <title>매출 인사이트</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="대시보드 처음으로">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>매출 인사이트</span>
+      </a>
+      <div class="header-actions">
+        <span class="privacy-pill"><span class="lock-dot">✓</span> 로컬에서만 처리</span>
+        <label class="upload-button" for="fileInput">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+          엑셀 불러오기
+        </label>
+        <input id="fileInput" type="file" accept=".xlsx,.csv" hidden>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">월간 매출 분석</p>
+          <h1>성장의 흐름을<br><span>한눈에 보세요.</span></h1>
+          <p class="hero-copy">기업별 매출 추이와 연간 성장률, 계절성을 자동으로 분석합니다.</p>
+        </div>
+        <div class="source-card" id="dropZone">
+          <div class="file-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7zM14 3v5h5M9.5 12h6m-6 3h6m-6 3h4"/></svg>
+          </div>
+          <div class="source-copy">
+            <span class="source-label">현재 데이터</span>
+            <strong id="sourceName">가상기업 3개 5개년매출데이터.xlsx</strong>
+            <span id="sourceMeta">60개월 · 3개 기업 · 결측치 0건</span>
+          </div>
+          <span class="drop-hint">파일을 여기에 놓아도 됩니다</span>
+        </div>
+      </section>
+
+      <section class="control-bar" aria-label="데이터 필터">
+        <div class="control-group">
+          <label for="yearSelect">기간</label>
+          <select id="yearSelect"><option value="all">전체 기간</option></select>
+        </div>
+        <div class="divider"></div>
+        <div class="control-group companies-control">
+          <span class="control-label">기업</span>
+          <div id="companyFilters" class="company-filters"></div>
+        </div>
+        <button class="reset-button" id="resetButton" type="button">초기화</button>
+      </section>
+
+      <section class="kpi-grid" id="kpiGrid" aria-label="핵심 지표"></section>
+
+      <section class="dashboard-grid">
+        <article class="panel trend-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">시계열</span><h2>월간 매출 추이</h2></div>
+            <div class="legend" id="trendLegend"></div>
+          </div>
+          <div class="chart-wrap" id="trendChart" aria-label="월간 매출 선 차트"></div>
+        </article>
+
+        <article class="panel mix-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">구성</span><h2>매출 비중</h2></div>
+          </div>
+          <div class="donut-layout">
+            <div class="donut" id="mixDonut"><div><strong id="mixTotal">0</strong><span>억원</span></div></div>
+            <div class="mix-list" id="mixList"></div>
+          </div>
+        </article>
+
+        <article class="panel annual-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">연간 비교</span><h2>연도별 매출</h2></div>
+            <span class="unit-label">단위: 억원</span>
+          </div>
+          <div id="annualChart" class="annual-chart" aria-label="연도별 매출 막대 차트"></div>
+        </article>
+
+        <article class="panel season-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">계절성</span><h2>월별 평균 패턴</h2></div>
+          </div>
+          <div id="seasonChart" class="season-chart" aria-label="월별 평균 매출 차트"></div>
+        </article>
+
+        <article class="panel insights-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">자동 분석</span><h2>주요 인사이트</h2></div>
+            <span class="live-badge"><i></i> 실시간 계산</span>
+          </div>
+          <div id="insights" class="insights"></div>
+        </article>
+
+        <article class="panel table-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">상세</span><h2>연간 성과 요약</h2></div>
+            <button id="downloadCsv" class="text-button" type="button">CSV 내보내기</button>
+          </div>
+          <div class="table-scroll"><table><thead id="summaryHead"></thead><tbody id="summaryBody"></tbody></table></div>
+        </article>
+      </section>
+
+      <p class="privacy-note">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.8-2.9 8.2-7 10-4.1-1.8-7-5.2-7-10V6zM9 12l2 2 4-4"/></svg>
+        모든 데이터 처리는 이 브라우저 안에서만 이루어지며 서버로 전송되지 않습니다.
+      </p>
+    </main>
+  </div>
+  <div id="tooltip" class="tooltip" role="status"></div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="vendor/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
